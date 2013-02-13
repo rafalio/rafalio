@@ -4,7 +4,7 @@ import           Control.Applicative ((<$>))
 import           Data.Monoid         (mappend)
 import           Hakyll
 import           Data.List (intersperse)
-
+import           Text.Pandoc
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -27,7 +27,7 @@ main = hakyll $ do
 
     match "posts/*" $ do
         route   $ customRoute $ setHTML . filterDate . toFilePath
-        compile $ pandocCompiler
+        compile $ pandocCompilerWith defaultHakyllReaderOptions pandocWriterOptions
             >>= loadAndApplyTemplate "templates/post.html"   postCtx
             >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/comments.html" postCtx
@@ -55,7 +55,8 @@ main = hakyll $ do
             postBodies <- ((take 7) <$> (recentFirst <$> loadAllSnapshots "posts/*" "content")) >>= getPostBodies
 
             let indexCtx = 
-                  constField "posts" postBodies  `mappend` defaultContext 
+                  constField "posts" postBodies  `mappend` 
+                  constField "title" "Home" `mappend`  defaultContext 
 
             makeItem postBodies
                 >>= loadAndApplyTemplate "templates/index.html" indexCtx 
@@ -107,4 +108,9 @@ feedConfig = FeedConfiguration
     , feedAuthorName  = "Rafal Szymanski"
     , feedAuthorEmail = "http://rafal.io"
     , feedRoot        = "http://rafal.io"
+    }
+
+pandocWriterOptions :: WriterOptions
+pandocWriterOptions = defaultHakyllWriterOptions
+    { writerHTMLMathMethod = MathML Nothing
     }
