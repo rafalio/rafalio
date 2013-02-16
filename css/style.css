@@ -157,7 +157,8 @@ table {
 	}
 	h4 {
 	    font-family: Georgia,"Times New Roman",Times,serif;
-	    font-size: 1em;
+	    font-size: 1.1em;
+      margin-top: 1em;
 	    color: #000;
 	}
 	/* used for "edit" link only visible to site owner/writers */

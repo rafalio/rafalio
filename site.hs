@@ -28,7 +28,7 @@ main = hakyll $ do
             >>= relativizeUrls
 
     match "posts/*" $ do
-        route   $ customRoute $ setHTML . filterDate . toFilePath
+        route   $ customRoute (filterDate . toFilePath) `composeRoutes` (setExtension "html")
         compile $ pandocCompilerWith defaultHakyllReaderOptions pandocWriterOptions
             >>= loadAndApplyTemplate "templates/post.html"   postCtx
             >>= saveSnapshot "content"
@@ -100,26 +100,20 @@ postList sortFilter = do
     list    <- applyTemplateList itemTpl postCtx posts
     return list
 
--- I'm a haskell idiot, that's the best I can do
-
--- This gets rid of the date string in my .md post
+-- This gets rid of the date string in my .md post, it's kind of ugly
 filterDate :: String -> String
 filterDate s = (\(a,b) -> (reverse b) ++ (drop 11 . reverse $ a)) $ span (/= '/') $ reverse s
-
--- changes the extension to html, I don't know how to use setExtension
-setHTML :: String -> String
-setHTML s = (++ "html") . reverse $ dropWhile (/= '.') $ reverse s
-
 
 feedConfig :: FeedConfiguration
 feedConfig = FeedConfiguration
     { feedTitle       = "Rafal's Blog"
-    , feedDescription = ""
+    , feedDescription = "Rafal's thoughts"
     , feedAuthorName  = "Rafal Szymanski"
     , feedAuthorEmail = "http://rafal.io"
     , feedRoot        = "http://rafal.io"
     }
 
+-- Add MathML rendering
 pandocWriterOptions :: WriterOptions
 pandocWriterOptions = defaultHakyllWriterOptions
     { writerHTMLMathMethod = MathML Nothing
