@@ -66,6 +66,7 @@ table {
 	    color: #000;
 	    padding: .6em;
 	    -webkit-font-smoothing: antialiased;
+      font-size: 1em;
 	}
 	/* fades out blog title */
 	.top {
@@ -213,7 +214,6 @@ table {
 	    line-height: 1.45em;
 	    margin: .7em 0 0 0;
 	    font-family: ff-meta-serif-web-pro, Georgia, Cambria, 'Times New Roman', Times, serif;
-	    font-size: 1.1em;
 	    color: #333;
 	    -webkit-font-smoothing: antialiased;
 	}
@@ -275,7 +275,6 @@ table {
 	    padding: .1em .0 0 1.1em;
 	    margin-top: .5em;
 	    font-family: ff-meta-serif-web-pro, Georgia, Cambria, 'Times New Roman', Times, serif;
-	    font-size: 1.1em;
 	    -webkit-font-smoothing: antialiased;
 	}
   .post p{

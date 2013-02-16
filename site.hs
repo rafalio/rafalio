@@ -5,6 +5,8 @@ import           Data.Monoid         (mappend)
 import           Hakyll
 import           Data.List (intersperse)
 import           Text.Pandoc
+import           Data.List.Split (splitOn)
+import           Hakyll.Core.Routes
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -32,6 +34,14 @@ main = hakyll $ do
             >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/comments.html" postCtx
             >>= loadAndApplyTemplate "templates/default.html" postCtx
+            >>= relativizeUrls
+
+    match "posts/misc/*" $ do
+        route $ gsubRoute "posts/misc/" (const "") `composeRoutes` (setExtension "html")
+        compile $ pandocCompilerWith defaultHakyllReaderOptions pandocWriterOptions
+            >>= loadAndApplyTemplate "templates/misc.html" defaultContext 
+            >>= loadAndApplyTemplate "templates/comments.html" defaultContext
+            >>= loadAndApplyTemplate "templates/default.html" defaultContext 
             >>= relativizeUrls
 
     create ["archives.html"] $ do
