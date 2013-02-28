@@ -286,7 +286,7 @@ table {
 	    padding: .1em 0 0 1.2em;
 	    margin-top: .5em;
 	    font-family: ff-meta-serif-web-pro, Georgia, Cambria, 'Times New Roman', Times, serif;
-	    font-size: 1.1em;
+	    font-size: 1em;
 	    -webkit-font-smoothing: antialiased;
 	}
 	.post li {
@@ -302,6 +302,21 @@ table {
 	    color: #666;
 	    font-family: Open Sans,Helvetica,sans-serif;
 	}
+
+  .post#archive_left{
+    width: 50%;
+    float:left;
+  
+  }
+	
+  .post#archive_right{
+    width: 50%;
+    float:left;
+  }
+
+  .clearfix{
+    clear: both;
+  }
 	/* line at bottom of post */
 	.home_bottom {
 	    border-bottom: 1px solid #efefef;
@@ -375,7 +390,7 @@ ol.commentlist{
 	padding: 10px;
 }
 .commentlist .comment-body{
-	padding: 10px;
+	padding: 10px#;
 	background: #EFEFEF;
 	border: solid thin #DEDEDE;
 	margin: 10px 0;

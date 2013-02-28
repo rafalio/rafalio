@@ -5,6 +5,7 @@ import           Data.Monoid         (mappend)
 import           Hakyll
 import           Data.List (intersperse)
 import           Text.Pandoc
+import           Text.Pandoc.Shared
 import           Data.List.Split (splitOn)
 import           Hakyll.Core.Routes
 
@@ -20,21 +21,19 @@ main = hakyll $ do
         route idRoute
         compile compressCssCompiler
 
-    match (fromList ["contact.markdown", "about.markdown"]) $ do
+    match (fromList ["contact.markdown", "about.markdown", "404.markdown"]) $ do
         route   $ setExtension "html" 
         compile $ pandocCompiler
             >>= loadAndApplyTemplate "templates/page.html"   defaultContext 
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
-            >>= relativizeUrls
 
-    match "posts/*" $ do
-        route   $ customRoute (filterDate . toFilePath) `composeRoutes` (setExtension "html")
-        compile $ pandocCompilerWith defaultHakyllReaderOptions pandocWriterOptions
+    match postPattern $ do
+        route   $ customRoute (preparePostString . toFilePath) `composeRoutes` (setExtension "html")
+        compile $ pandocCompilerWithTransform defaultHakyllReaderOptions pandocWriterOptions (headerShift 2)
             >>= loadAndApplyTemplate "templates/post.html"   postCtx
             >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/comments.html" postCtx
             >>= loadAndApplyTemplate "templates/default.html" postCtx
-            >>= relativizeUrls
 
     match "posts/misc/*" $ do
         route $ gsubRoute "posts/misc/" (const "") `composeRoutes` (setExtension "html")
@@ -42,27 +41,26 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/misc.html" defaultContext 
             >>= loadAndApplyTemplate "templates/comments.html" defaultContext
             >>= loadAndApplyTemplate "templates/default.html" defaultContext 
-            >>= relativizeUrls
 
     create ["archives.html"] $ do
         route idRoute
         compile $ do
             let archiveCtx =
-                    field "posts" (\_ -> postList recentFirst) `mappend`
-                    constField "title" "Archives"              `mappend`
+                    field "posts" (\_ -> postList recentFirst postPattern) `mappend`
+                    field "misc" (\_ -> postList recentFirst (fromGlob "posts/misc/*")) `mappend`
+                    field "books" (\_ -> postList recentFirst (fromGlob "posts/books/*")) `mappend`
+                    constField "title" "Archives" `mappend`
                     defaultContext
 
             makeItem ""
-                >>= loadAndApplyTemplate "templates/archives.html" archiveCtx
-                >>= loadAndApplyTemplate "templates/page.html" archiveCtx
+                >>= loadAndApplyTemplate "templates/archives_template.html" archiveCtx
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx 
-                >>= relativizeUrls
 
 
     create ["index.html"] $ do
         route idRoute
         compile $ do
-            postBodies <- ((take 7) <$> (recentFirst <$> loadAllSnapshots "posts/*" "content")) >>= getPostBodies
+            postBodies <- ((take 7) <$> (recentFirst <$> loadAllSnapshots postPattern "content")) >>= getPostBodies
 
             let indexCtx = 
                   constField "posts" postBodies  `mappend` 
@@ -71,7 +69,6 @@ main = hakyll $ do
             makeItem postBodies
                 >>= loadAndApplyTemplate "templates/index.html" indexCtx 
                 >>= loadAndApplyTemplate "templates/default.html" indexCtx 
-                >>= relativizeUrls
 
     match "templates/*" $ compile templateCompiler
 
@@ -79,7 +76,7 @@ main = hakyll $ do
       route idRoute
       compile $ do
           let feedCtx = postCtx `mappend` bodyField "description"
-          posts <- take 10 . recentFirst <$> loadAllSnapshots "posts/*" "content"
+          posts <- take 10 . recentFirst <$> loadAllSnapshots postPattern "content"
           renderRss feedConfig feedCtx posts
 
 --------------------------------------------------------------------------------
@@ -93,9 +90,11 @@ postCtx =
 getPostBodies :: [Item String] -> Compiler String
 getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 
-postList :: ([Item String] -> [Item String]) -> Compiler String
-postList sortFilter = do
-    posts   <- sortFilter <$> loadAll "posts/*"
+postPattern =  (fromGlob "posts/*" .||. fromGlob "posts/dev/*" .||. fromGlob "posts/books/*")
+
+postList :: ([Item String] -> [Item String]) -> Pattern -> Compiler String
+postList sortFilter pattern = do
+    posts   <- sortFilter <$> loadAll pattern
     itemTpl <- loadBody "templates/post-item.html"
     list    <- applyTemplateList itemTpl postCtx posts
     return list
@@ -103,6 +102,13 @@ postList sortFilter = do
 -- This gets rid of the date string in my .md post, it's kind of ugly
 filterDate :: String -> String
 filterDate s = (\(a,b) -> (reverse b) ++ (drop 11 . reverse $ a)) $ span (/= '/') $ reverse s
+
+-- 
+getFilename :: String -> String
+getFilename =  reverse . fst . span (/= '/') . reverse
+
+preparePostString :: String -> String
+preparePostString = ((++) "posts/") . getFilename . filterDate
 
 feedConfig :: FeedConfiguration
 feedConfig = FeedConfiguration
@@ -116,5 +122,5 @@ feedConfig = FeedConfiguration
 -- Add MathML rendering
 pandocWriterOptions :: WriterOptions
 pandocWriterOptions = defaultHakyllWriterOptions
-    { writerHTMLMathMethod = MathML Nothing
+    { writerHTMLMathMethod = MathJax ""
     }
