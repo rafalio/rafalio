@@ -6,13 +6,14 @@ Hi, my name is Rafal Szymanski, and I’m a computer science student at Imperial
 
 Here are some of my things online:
 
-* [My CV](/stuff/cv_rafal_szymanski.pdf)
+* [My CV](/static/cv_rafal_szymanski.pdf)
 * [LinkedIn](http://uk.linkedin.com/in/szymanskirafal)
 * [Github](http://github.com/radicality)
 * [GoodReads](http://www.goodreads.com/user/show/6752954-rafal-szymanski)
 * [Twitter](http://twitter.com/rafalszymanski)
 * [StackOverflow](http://stackoverflow.com/users/856079/rafal-szymanski)
 * [ProjectEuler](http://projecteuler.net/profile/radicality.png)
+* [Masters Thesis](/static/rszymanski_thesis.pdf)
 
 
 [hakyll]: http://jaspervdj.be/hakyll/ "Hakyll"

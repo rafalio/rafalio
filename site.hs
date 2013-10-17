@@ -8,13 +8,18 @@ import           Text.Pandoc
 import           Text.Pandoc.Shared
 import           Data.List.Split (splitOn)
 import           Hakyll.Core.Routes
+import           Control.Monad
 
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyll $ do
 
-    match "stuff/*" $ do
+    match "static/*" $ do
         route   idRoute
+        compile copyFileCompiler
+
+    match "posts/img/**" $ do
+        route $ gsubRoute "posts/" (const "")
         compile copyFileCompiler
 
     match "css/*" $ do
@@ -27,17 +32,17 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/page.html"   defaultContext 
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
 
-    match postPattern $ do
+    match allPattern $ do
         route   $ customRoute (preparePostString . toFilePath) `composeRoutes` (setExtension "html")
-        compile $ pandocCompilerWithTransform defaultHakyllReaderOptions pandocWriterOptions (headerShift 2)
+        compile $ pandocCompilerWithTransform defaultHakyllReaderOptions pandocWriterOptions (headerShift 0)
             >>= loadAndApplyTemplate "templates/post.html"   postCtx
             >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/comments.html" postCtx
             >>= loadAndApplyTemplate "templates/default.html" postCtx
 
-    match "posts/misc/*" $ do
-        route $ gsubRoute "posts/misc/" (const "") `composeRoutes` (setExtension "html")
-        compile $ pandocCompilerWith defaultHakyllReaderOptions pandocWriterOptions
+    match (fromGlob "posts/misc/*" .||. fromGlob "posts/philosophy/*") $ do
+        route $ gsubRoute ("posts/misc/") (const "") `composeRoutes` gsubRoute ("posts/philosophy/") (const "") `composeRoutes` setExtension "html"
+        compile $ pandocCompilerWithTransform defaultHakyllReaderOptions pandocWriterOptions (headerShift 0)
             >>= loadAndApplyTemplate "templates/misc.html" defaultContext 
             >>= loadAndApplyTemplate "templates/comments.html" defaultContext
             >>= loadAndApplyTemplate "templates/default.html" defaultContext 
@@ -46,8 +51,9 @@ main = hakyll $ do
         route idRoute
         compile $ do
             let archiveCtx =
+                    field "misc"  (\_ -> postList (return) (fromGlob "posts/misc/*")) `mappend`
+                    field "philosophy" (\_ -> postList (return) (fromGlob "posts/philosophy/*")) `mappend`
                     field "posts" (\_ -> postList recentFirst postPattern) `mappend`
-                    field "misc" (\_ -> postList recentFirst (fromGlob "posts/misc/*")) `mappend`
                     field "books" (\_ -> postList recentFirst (fromGlob "posts/books/*")) `mappend`
                     constField "title" "Archives" `mappend`
                     defaultContext
@@ -60,7 +66,7 @@ main = hakyll $ do
     create ["index.html"] $ do
         route idRoute
         compile $ do
-            postBodies <- ((take 7) <$> (recentFirst <$> loadAllSnapshots postPattern "content")) >>= getPostBodies
+            postBodies <- ((take 10) <$> (recentFirst =<< loadAllSnapshots postPattern "content")) >>= getPostBodies
 
             let indexCtx = 
                   constField "posts" postBodies  `mappend` 
@@ -76,7 +82,7 @@ main = hakyll $ do
       route idRoute
       compile $ do
           let feedCtx = postCtx `mappend` bodyField "description"
-          posts <- take 10 . recentFirst <$> loadAllSnapshots postPattern "content"
+          posts <- fmap (take 10) . recentFirst =<< loadAllSnapshots postPattern "content"
           renderRss feedConfig feedCtx posts
 
 --------------------------------------------------------------------------------
@@ -90,11 +96,13 @@ postCtx =
 getPostBodies :: [Item String] -> Compiler String
 getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 
-postPattern =  (fromGlob "posts/*" .||. fromGlob "posts/dev/*" .||. fromGlob "posts/books/*")
+postPattern =  fromGlob "posts/*" .||. fromGlob "posts/dev/*" 
+allPattern  =  fromGlob "posts/*" .||. fromGlob "posts/dev/*" .||. fromGlob "posts/books/*"
 
-postList :: ([Item String] -> [Item String]) -> Pattern -> Compiler String
+
+{-postList :: ([Item String] -> [Item String]) -> Pattern -> Compiler String-}
 postList sortFilter pattern = do
-    posts   <- sortFilter <$> loadAll pattern
+    posts   <- sortFilter =<< loadAll pattern
     itemTpl <- loadBody "templates/post-item.html"
     list    <- applyTemplateList itemTpl postCtx posts
     return list

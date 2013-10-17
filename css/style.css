@@ -34,6 +34,12 @@ time, mark, audio, video {
 	font: inherit;
 	vertical-align: baseline;
 }
+
+sup{
+  vertical-align: super;
+}
+
+
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure, 
 footer, header, hgroup, menu, nav, section {
@@ -111,50 +117,42 @@ table {
       margin: auto;
   }
 
-	/* blog title */
-	h1 {
-	    font-size: 150%;
-	    font-weight: normal;
-	    color: #d3d3d3;
-	    letter-spacing: .01em;
-	    margin: 0 .05em 0 0;
-	    text-align: center;
-	}
-	h1 a:link {
-	    color: #d3d3d3;
-	    text-decoration: none;
-	    border-width: 0 0 1px 0;
-	    border-style: none none solid none;
-	    border-color: #c0c0c0;
-	}
-	h1 a:visited {
-	    color: #d3d3d3;
-	    text-decoration: none;
-	    border-width: 0 0 1px 0;
-	    border-style: none none solid none;
-	    border-color: #c0c0c0;
-	}
-	h1 a#tagline { color: #56a49f }
+	/* main titles */
+
+  .post_header{
+    text-align:center;
+  }
+  .post_header h1{
+    font-size: 2em;
+	  color: #777;
+  }
 
 	/* post title */
-	h2 {
+	h1 {
 	    font-family: acta-display, Georgia, Times, serif;
-	    font-size: 2em;
-	    color: #777;
+	    color: #111;
+      font-size:1.7em;
 	    font-weight: normal;
-	    margin-top: 0.5em;
-	    text-align: center;
+	    margin-top: 1em;
 	}
-	/* Titles in post */
+
+  h2 {
+  	  font-family: acta-display, Georgia, Times, serif;
+	    color: #222;
+      font-size:1.4em;
+	    font-weight: normal;
+      margin-top: 1em;
+  }
+
+
 	h3 {
 	    font-family: acta-display, Georgia, Times, serif;
-	    font-size: 1.3em;
-	    color: #555;
+	    font-size: 1.1em;
+	    color: #333;
 	    font-weight: normal;
-	    line-height: 1em;
-	    margin-top: 1em;
-	    text-align: left;
+	    margin-top: 0.5em;
 	}
+
 	h4 {
 	    font-family: Georgia,"Times New Roman",Times,serif;
 	    font-size: 1.1em;
@@ -579,4 +577,13 @@ ol.commentlist .comment-author{
 	.navigation { display: none }
 	.subscribe { display: none }
 	.footer { display: none }
+}
+
+
+div.figure{
+    text-align:center;
+}
+
+p.caption{
+    text-align:center;
 }
