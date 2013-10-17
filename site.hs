@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 import           Control.Applicative ((<$>))
-import           Data.Monoid         (mappend)
+import           Data.Monoid         (mappend,mconcat)
 import           Hakyll
 import           Data.List (intersperse)
 import           Text.Pandoc
@@ -9,6 +9,8 @@ import           Text.Pandoc.Shared
 import           Data.List.Split (splitOn)
 import           Hakyll.Core.Routes
 import           Control.Monad
+import qualified Data.Map as M
+import           Data.Maybe
 
 --------------------------------------------------------------------------------
 main :: IO ()
@@ -86,10 +88,19 @@ main = hakyll $ do
           renderRss feedConfig feedCtx posts
 
 --------------------------------------------------------------------------------
+
+-- Use the short title when showing in a page, such as in the archives.
+-- Use full title when finally on the page
+listTitleCtx :: Context a
+listTitleCtx = field "listTitle" $ \item -> do
+                 metadata <- getMetadata (itemIdentifier item)
+                 return $ fromMaybe (fromJust $ M.lookup "title" metadata) $ M.lookup "short" metadata
+
 postCtx :: Context String
-postCtx =
-    dateField "date" "%B %e, %Y" `mappend`
-    defaultContext
+postCtx = mconcat
+    [dateField "date" "%B %e, %Y",
+    listTitleCtx,
+    defaultContext]
 
 --------------------------------------------------------------------------------
 
@@ -99,8 +110,6 @@ getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 postPattern =  fromGlob "posts/*" .||. fromGlob "posts/dev/*" 
 allPattern  =  fromGlob "posts/*" .||. fromGlob "posts/dev/*" .||. fromGlob "posts/books/*"
 
-
-{-postList :: ([Item String] -> [Item String]) -> Pattern -> Compiler String-}
 postList sortFilter pattern = do
     posts   <- sortFilter =<< loadAll pattern
     itemTpl <- loadBody "templates/post-item.html"
@@ -130,5 +139,4 @@ feedConfig = FeedConfiguration
 -- Add MathML rendering
 pandocWriterOptions :: WriterOptions
 pandocWriterOptions = defaultHakyllWriterOptions
-    { writerHTMLMathMethod = MathJax ""
-    }
+    { writerHTMLMathMethod = MathJax "" }
