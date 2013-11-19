@@ -2,7 +2,7 @@
 title: About
 ---
 
-Hi, my name is Rafal Szymanski, and I’m a computer science student at Imperial College London, Department of Computing. This is a place to put my thoughts online. It is a static blog generated with [Hakyll][hakyll]. The source for the site is available on [github][github]
+Hi, my name is Rafal Szymanski, and I just graduated with a Masters in Computer Science from Imperial College London, Department of Computing. This is a place to put my thoughts online. It is a static blog generated with [Hakyll][hakyll]. The source for the site is available on [github][github]
 
 Here are some of my things online:
 

@@ -42,7 +42,8 @@ main = hakyll $ do
 
     match allPattern $ do
         route   $ customRoute (preparePostString . toFilePath) `composeRoutes` (setExtension "html")
-        compile $ pandocCompilerWithTransform defaultHakyllReaderOptions pandocWriterOptions (headerShift 0)
+        compile $ getResourceBody
+            >>= selectCustomPandocCompiler 
             >>= loadAndApplyTemplate "templates/post.html"   postCtx
             >>= saveSnapshot "content"
             >>= loadAndApplyTemplate "templates/comments.html" postCtx
@@ -59,19 +60,17 @@ main = hakyll $ do
     create ["archives.html"] $ do
         route idRoute
         compile $ do
-
             let archiveCtx = mconcat
-                  [  field "misc"  (\_ -> postList (return) ("posts/misc/*.markdown")),
+                  [  field "misc"       (\_ -> postList (return) ("posts/misc/*.markdown")),
                      field "philosophy" (\_ -> postList (return) ("posts/philosophy/*.markdown")),
-                     field "posts" (\_ -> postList recentFirst postPattern),
-                     field "books" (\_ -> postList recentFirst ("posts/books/*.markdown")),
+                     field "posts"      (\_ -> postList recentFirst postPattern),
+                     field "books"      (\_ -> postList recentFirst ("posts/books/*.markdown")),
+                     field "dev"        (\_ -> postList recentFirst ("posts/dev/*.markdown")),
                      constField "title" "Archives",
                      defaultContext ]
-
             makeItem ""
                 >>= loadAndApplyTemplate "templates/archives_template.html" archiveCtx
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx 
-
 
     create ["index.html"] $ do
         route idRoute
@@ -92,7 +91,7 @@ main = hakyll $ do
       route idRoute
       compile $ do
           let feedCtx = postCtx `mappend` bodyField "description"
-          posts <- fmap (take 10) . recentFirst =<< loadAllSnapshots postPattern "content"
+          posts <- fmap (take 10) . recentFirst =<< loadAllSnapshots allPattern "content"
           renderRss feedConfig feedCtx posts
 
 --------------------------------------------------------------------------------
@@ -115,7 +114,7 @@ postCtx = mconcat
 getPostBodies :: [Item String] -> Compiler String
 getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 
-postPattern =  "posts/*.markdown" .||. "posts/dev/*.markdown" 
+postPattern =  "posts/*.markdown"
 allPattern  =  "posts/*.markdown" .||. "posts/dev/*.markdown" .||. "posts/books/*.markdown"
 
 postList sortFilter pattern = do
@@ -123,9 +122,15 @@ postList sortFilter pattern = do
     itemTpl <- loadBody "templates/post-item.html"
     applyTemplateList itemTpl postCtx posts
 
--- This gets rid of the date string in my .md post
+-- This gets rid of the date string in my .md post, and adds the "posts/" prefix
 preparePostString :: String -> String
 preparePostString = ((++) "posts/") . drop 11 . takeFileName
+
+selectCustomPandocCompiler :: Item String -> Compiler (Item String)
+selectCustomPandocCompiler item = do
+    metadata <- getMetadata (itemIdentifier item)
+    let wOptions = if (M.member "toc" metadata) then pandocWriterOptionsTOC else pandocWriterOptions
+    pandocCompilerWithTransform defaultHakyllReaderOptions wOptions (headerShift 0)
 
 feedConfig :: FeedConfiguration
 feedConfig = FeedConfiguration
@@ -136,7 +141,19 @@ feedConfig = FeedConfiguration
     , feedRoot        = "http://rafal.io"
     }
 
--- Add MathML rendering
+-- Pandoc options with Math Mode (no TOC)
 pandocWriterOptions :: WriterOptions
-pandocWriterOptions = defaultHakyllWriterOptions
-    { writerHTMLMathMethod = MathJax "" }
+pandocWriterOptions = defaultHakyllWriterOptions { 
+  writerHTMLMathMethod = MathJax ""
+}
+
+-- For pages where I want a TOC
+pandocWriterOptionsTOC :: WriterOptions
+pandocWriterOptionsTOC = defaultHakyllWriterOptions { 
+  writerHTMLMathMethod = MathJax "",
+  writerTOCDepth = 3,
+  writerTableOfContents = True,
+  writerStandalone = True,
+  writerTemplate = "<h3>Table of Contents</h3>\n$toc$\n$body$",
+  writerNumberSections = True
+}
