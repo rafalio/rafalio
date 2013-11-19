@@ -102,9 +102,7 @@ main = hakyll $ do
 listTitleCtx :: Context a
 listTitleCtx = field "listTitle" $ \item -> do
                  metadata <- getMetadata (itemIdentifier item)
-                 {-return $ fromJust $ msum [M.lookup "short", M.lookup "title"]-}
                  return . fromJust . msum $ (flip M.lookup) metadata <$> ["short","title"]
-                 {-return $ fromMaybe (fromJust $ M.lookup "title" metadata) $ M.lookup "short" metadata-}
 
 postCtx :: Context String
 postCtx = mconcat
