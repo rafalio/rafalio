@@ -6,17 +6,26 @@ import           Hakyll
 import           Data.List (intersperse)
 import           Text.Pandoc
 import           Text.Pandoc.Shared
+import           Text.Pandoc.Walk
+import           Text.Pandoc.Writers.HTML
 import           Data.List.Split (splitOn)
 import           Hakyll.Core.Routes
 import           Control.Monad
 import qualified Data.Map as M
 import           Data.Maybe
 import           System.FilePath    (takeBaseName, takeDirectory, takeFileName)
+import qualified Text.Blaze.Html5 as H
+import qualified Text.Blaze.Html5.Attributes as A
+import           Text.Blaze.Html (preEscapedToHtml, (!))
+import           Text.Blaze.Html.Renderer.String (renderHtml)
+import           Text.Highlighting.Kate (highlightAs, defaultFormatOpts)
+import           Text.Highlighting.Kate.Format.HTML (formatHtmlBlock)
+
 
 getCategory :: MonadMetadata m => Identifier -> m [String]
 getCategory = return . return . takeBaseName . takeDirectory . toFilePath
-
 --------------------------------------------------------------------------------
+
 main :: IO ()
 main = hakyll $ do
 
@@ -52,7 +61,7 @@ main = hakyll $ do
     match ("posts/misc/*" .||. "posts/philosophy/*.markdown") $ do
         route $ gsubRoute ("posts/misc/") (const "") `composeRoutes` gsubRoute ("posts/philosophy/") (const "") `composeRoutes` setExtension "html"
         compile $ 
-            pandocCompilerWithTransform defaultHakyllReaderOptions pandocWriterOptions (headerShift 0)
+            pandocCompilerWithTransform defaultHakyllReaderOptions pandocWriterOptions processCodeBlocks
             >>= loadAndApplyTemplate "templates/misc.html" defaultContext 
             >>= loadAndApplyTemplate "templates/comments.html" defaultContext
             >>= loadAndApplyTemplate "templates/default.html" defaultContext 
@@ -130,7 +139,7 @@ selectCustomPandocCompiler :: Item String -> Compiler (Item String)
 selectCustomPandocCompiler item = do
     metadata <- getMetadata (itemIdentifier item)
     let wOptions = if (M.member "toc" metadata) then pandocWriterOptionsTOC else pandocWriterOptions
-    pandocCompilerWithTransform defaultHakyllReaderOptions wOptions (headerShift 0)
+    pandocCompilerWithTransform defaultHakyllReaderOptions wOptions processCodeBlocks
 
 feedConfig :: FeedConfiguration
 feedConfig = FeedConfiguration
@@ -157,3 +166,24 @@ pandocWriterOptionsTOC = defaultHakyllWriterOptions {
   writerTemplate = "<h3>Table of Contents</h3>\n$toc$\n$body$",
   writerNumberSections = True
 }
+
+
+-- Put code blocks into a figure environment
+
+processCodeBlocks :: Pandoc -> Pandoc
+processCodeBlocks = walk processCodeBlock
+
+processCodeBlock :: Block -> Block
+processCodeBlock b@(CodeBlock (_, classes, pairs) code) =
+  let lang     = getLang classes
+      caption  = lookup "caption" pairs
+      codeHtml = formatHtmlBlock defaultFormatOpts (highlightAs lang code)
+      captStr  = maybe "" (renderHtml . H.figcaption . H.span . H.toHtml) caption
+      composed = renderHtml $ H.figure ! A.class_ "code" $ do
+        preEscapedToHtml $ (renderHtml codeHtml) ++ captStr
+  in
+    RawBlock "html" composed
+processCodeBlock x = x
+
+getLang [] = "text"
+getLang xs = head xs
