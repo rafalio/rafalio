@@ -30,7 +30,13 @@ main :: IO ()
 main = hakyll $ do
 
     match "static/*" $ route idRoute >> compile copyFileCompiler
-    match "css/*"    $ route idRoute >> compile compressCssCompiler
+    match "css/*.css" $ route idRoute >> compile compressCssCompiler
+    match "css/*.scss"  $ do 
+      route $ setExtension "css"
+      compile $ getResourceString >>=
+                withItemBody (unixFilter "scss" ["--trace"]) >>=
+                return . fmap compressCss
+
     match "templates/*" $ compile templateCompiler
     match "*.csl" $ compile cslCompiler
     match "*.bib" $ compile biblioCompiler 
@@ -163,7 +169,7 @@ pandocWriterOptionsTOC = defaultHakyllWriterOptions {
   writerTOCDepth = 3,
   writerTableOfContents = True,
   writerStandalone = True,
-  writerTemplate = "<h3>Table of Contents</h3>\n$toc$\n$body$",
+  writerTemplate = "<div class=\"toc\"><h3>Table of Contents</h3>\n$toc$\n</div>$body$",
   writerNumberSections = True
 }
 
