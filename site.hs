@@ -130,7 +130,7 @@ getPostBodies :: [Item String] -> Compiler String
 getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 
 postPattern =  "posts/*.markdown"
-allPattern  =  "posts/*.markdown" .||. "posts/dev/*.markdown" .||. "posts/books/*.markdown"
+allPattern  =  "posts/*.markdown" .||. "posts/dev/**.markdown" .||. "posts/books/**.markdown"
 
 postList sortFilter pattern = do
     posts   <- sortFilter =<< loadAll pattern
