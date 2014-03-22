@@ -1,5 +1,5 @@
 body{
-  font-size: 1em;
+  font-size: 0.95em;
   background-color: #fff;
   padding: 0.6em;
   color: #000;
@@ -119,11 +119,12 @@ a:hover{
 
 div.figure{
   text-align: center;
-  padding: 5px 0;
-}
-p.caption{
-  text-align: center;
-  margin: 0px;
+  padding: 10px 0;
+  p.caption{
+    font-size: 0.9em;
+    text-align: center;
+    margin-top: -5px;
+  }
 }
 
 ul, ol{
