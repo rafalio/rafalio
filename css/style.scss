@@ -3,8 +3,9 @@ body{
   background-color: #fff;
   padding: 0.6em;
   color: #000;
-  font-family: 'Noto Sans', Helvetica, Arial, sans-serif;
-
+  /*font-family: 'Noto Sans', Helvetica, Arial, sans-serif;*/
+  font-family: 'Merriweather', 'Hoefler Text', 'Georgia', 'Times New Roman', 'Serif';
+  -webkit-font-smoothing: antialiased
 }
 
 .container{
@@ -36,17 +37,15 @@ body{
   margin-top: 20px;
 }
 
-ul, ol{
-  line-height: 1.5em;
-}
-
 p{
   margin-top: 10px;
-  color: #333;
-  line-height: 1.5em;
 }
+
 .post{
-  font-size: 0.9em;
+  font-size: 1em;
+  text-align:justify;
+  color: #333;
+  line-height: 1.7em;
   p{
     text-align: justify;
   }
@@ -59,9 +58,10 @@ p{
   }
   h1{
     font-size: 2em;
+    margin-bottom: 20px;
   }
   h6{
-    margin-top: 10px;
+    margin-top: -10px;
     color: #aaa;
   }
 }
@@ -126,14 +126,11 @@ p.caption{
   margin: 0px;
 }
 
-ul{
+ul, ol{
   list-style-type: disc;
-  padding: 0 0 0 1em;
-
-  li{
-    padding: 0.3em 0 0 0;
-  }
+  padding: 0 0 0 1.5em;
 }
+
 
 blockquote {
 	    border-left: 2px solid #a5abab;

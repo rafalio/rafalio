@@ -31,4 +31,4 @@ makeFilename :: String -> Title -> String
 makeFilename date title = concat [date, "-", f title, ".markdown"]
   where
     f = concat . intersperse "-" . words . map toLower . 
-        filter (uncurry (||) . (isAlpha &&& isSpace))
+        filter (uncurry (||) . (isAlphaNum &&& isSpace))
