@@ -5,7 +5,6 @@ import           Data.Monoid         (mappend,mconcat)
 import           Hakyll
 import           Data.List (intersperse, sort, sortBy)
 import           Data.Ord (comparing)
-import           Algorithms.NaturalSort as NS
 import           Text.Pandoc
 import           Text.Pandoc.Shared
 import           Text.Pandoc.Walk
