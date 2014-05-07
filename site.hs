@@ -140,9 +140,8 @@ catMap = [
 getPostBodies :: [Item String] -> Compiler String
 getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 
-postPattern =  "posts/*.markdown"
+-- a pattern to match all my content
 allPattern  =  foldl1 (.||.) (map snd catMap)
-
 
 
 postList sortFilter pattern = do
