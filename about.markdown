@@ -8,7 +8,7 @@ Here are some of my things online:
 
 * [My CV](/static/cv_rafal_szymanski.pdf)
 * [LinkedIn](http://uk.linkedin.com/in/szymanskirafal)
-* [Github](http://github.com/radicality)
+* [Github](http://github.com/rafalio)
 * [GoodReads](http://www.goodreads.com/user/show/6752954-rafal-szymanski)
 * [Twitter](http://twitter.com/rafalszymanski)
 * [StackOverflow](http://stackoverflow.com/users/856079/rafal-szymanski)
