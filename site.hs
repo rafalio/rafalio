@@ -85,15 +85,19 @@ main = hakyll $ do
     create ["index.html"] $ do
         route idRoute
         compile $ do
-            postBodies <- ((take 10) <$> (recentFirst =<< loadAllSnapshots postPattern "content")) >>= getPostBodies
+            postBodies <- (take 10) <$> (recentFirst =<< loadAllSnapshots allPattern "content")
+            itemTmpl <- loadBody "templates/post-item-homepage.html"
+            frontpageItems <- applyTemplateList itemTmpl postCtx postBodies
+            
 
             let indexCtx = mconcat
-                  [  constField "posts" postBodies,
-                     constField "title" "Home",
+                  [  constField "recentPosts" frontpageItems,
+                     constField "title" "Rafal's Blog",
                      defaultContext ]
 
-            makeItem postBodies
+            makeItem frontpageItems 
                 >>= loadAndApplyTemplate "templates/index.html" indexCtx 
+                >>= loadAndApplyTemplate "templates/page.html"   indexCtx
                 >>= loadAndApplyTemplate "templates/default.html" indexCtx 
 
 
@@ -143,7 +147,6 @@ getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 -- a pattern to match all my content
 allPattern  =  foldl1 (.||.) (map snd catMap)
 
-
 postList sortFilter pattern = do
     posts   <- sortFilter =<< loadAll pattern
     itemTpl <- loadBody "templates/post-item.html"
@@ -157,7 +160,6 @@ postListRecent pat = postList recentFirst pat
 preparePostString :: String -> String
 preparePostString path = 
     let fn = takeFileName path
-        
         parsedTime = parseTime defaultTimeLocale "%Y-%m-%d" (take 10 fn) :: Maybe UTCTime
     in 
       ((++) "posts/") $ case parsedTime of

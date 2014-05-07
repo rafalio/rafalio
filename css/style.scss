@@ -240,3 +240,41 @@ table {
   }
 }
 
+div.homepage{
+
+  h2{
+    font-size: 2em;
+    text-align: center;
+  }
+
+  p{
+    font-size: 1.1em;
+  }
+
+  li{
+    list-style-type: none;
+    padding: 5px 0;
+
+    p{
+      color: #999;
+      padding: 0;
+      display: inline-block;
+      width: 170px;
+      font-size: 1em;
+    }
+
+    a{
+       font-size: 1.2em;
+       color: #666;
+       text-decoration: none;
+    }
+
+    a:hover{
+       color: #111;
+    }
+  }
+
+
+
+}
+
