@@ -21,11 +21,12 @@ import           Text.Blaze.Html (preEscapedToHtml, (!))
 import           Text.Blaze.Html.Renderer.String (renderHtml)
 import           Text.Highlighting.Kate (highlightAs, defaultFormatOpts)
 import           Text.Highlighting.Kate.Format.HTML (formatHtmlBlock)
+import           System.Locale
+import           Data.Time.Format
+import           Data.Time.Clock
 
 
-getCategory :: MonadMetadata m => Identifier -> m [String]
-getCategory = return . return . takeBaseName . takeDirectory . toFilePath
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 main :: IO ()
 main = hakyll $ do
@@ -56,6 +57,7 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
 
 
+    -- Everything else does need it
     match allPattern $ do
         route   $ customRoute (preparePostString . toFilePath) `composeRoutes` (setExtension "html")
         compile $ getResourceBody
@@ -65,29 +67,17 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/comments.html" postCtx
             >>= loadAndApplyTemplate "templates/default.html" postCtx
 
-    match ("posts/misc/*" .||. "posts/philosophy/*.markdown") $ do
-        route $ gsubRoute ("posts/misc/") (const "") `composeRoutes` gsubRoute ("posts/philosophy/") (const "") `composeRoutes` setExtension "html"
-        compile $ 
-            pandocCompilerWithTransform defaultHakyllReaderOptions pandocWriterOptions processCodeBlocks
-            >>= loadAndApplyTemplate "templates/misc.html" defaultContext 
-            >>= loadAndApplyTemplate "templates/comments.html" defaultContext
-            >>= loadAndApplyTemplate "templates/default.html" defaultContext 
-
     create ["archives.html"] $ do
         route idRoute
         compile $ do
-            let archiveCtx = mconcat
-                  [  field "misc"       (\_ -> postList (return) ("posts/misc/*.markdown")),
-                     field "philosophy" (\_ -> postList (return) ("posts/philosophy/*.markdown")),
-                     field "posts"      (\_ -> postList recentFirst postPattern),
-                     field "books"      (\_ -> postList recentFirst ("posts/books/*.markdown")),
-                     field "dev"        (\_ -> postList recentFirst ("posts/dev/*.markdown")),
-                     field "euler"        (\_ -> postList recentFirst ("posts/dev/PE/*.markdown")),
-                     field "leetcode"        (\_ -> postList recentFirst ("posts/dev/leetcode/*.markdown")),
-                     field "codility"        (\_ -> postList recentFirst ("posts/dev/codility/*.markdown")),
-                     field "topcoder"        (\_ -> postList recentFirst ("posts/dev/topcoder/*.markdown")),
-                     constField "title" "Archives",
-                     defaultContext ]
+            let catListCtx = mconcat $ map (\(name, pat) -> field name (const $ postListRecent pat)) catMap
+
+            let archiveCtx = mconcat [
+                    catListCtx,
+                    constField "title" "Archives",
+                    defaultContext
+                    ]
+
             makeItem ""
                 >>= loadAndApplyTemplate "templates/archives_template.html" archiveCtx
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx 
@@ -131,21 +121,50 @@ postCtx = mconcat
 
 --------------------------------------------------------------------------------
 
+-- Category map from field name to where it's located in my drive
+catMap :: [(String, Pattern)]
+catMap = [ 
+    ("travel",      "posts/travel/**.markdown"),
+    ("restaurants", "posts/restaurants/**.markdown"),
+    ("misc",        "posts/misc/*.markdown"),
+    ("philosophy",  "posts/philosophy/*.markdown"),
+    ("posts",       "posts/*.markdown"),
+    ("books",       "posts/books/*.markdown"),
+    ("dev",         "posts/dev/*.markdown"),
+    ("euler",       "posts/dev/PE/*.markdown"),
+    ("leetcode",    "posts/dev/leetcode/*.markdown"),
+    ("codility",    "posts/dev/codility/*.markdown"),
+    ("topcoder",    "posts/dev/topcoder/*.markdown")
+   ]
+
 getPostBodies :: [Item String] -> Compiler String
 getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 
 postPattern =  "posts/*.markdown"
-allPattern  =  "posts/*.markdown" .||. "posts/dev/**.markdown" .||. "posts/books/**.markdown"
+allPattern  =  foldl1 (.||.) (map snd catMap)
+
+
 
 postList sortFilter pattern = do
     posts   <- sortFilter =<< loadAll pattern
     itemTpl <- loadBody "templates/post-item.html"
     applyTemplateList itemTpl postCtx posts 
-    {-applyTemplateList itemTpl postCtx (sortBy (\xs ys -> comparing length (toFilePath . itemIdentifier $ xs) (toFilePath.itemIdentifier $ys) `mappend` compare (itemIdentifier xs) (itemIdentifier ys) ) posts)-}
+
+-- Sort by recency
+postListRecent pat = postList recentFirst pat 
 
 -- This gets rid of the date string in my .md post, and adds the "posts/" prefix
+-- This is unsafe
 preparePostString :: String -> String
-preparePostString = ((++) "posts/") . drop 11 . takeFileName
+preparePostString path = 
+    let fn = takeFileName path
+        
+        parsedTime = parseTime defaultTimeLocale "%Y-%m-%d" (take 10 fn) :: Maybe UTCTime
+    in 
+      ((++) "posts/") $ case parsedTime of
+          Nothing -> fn         -- parse failed, no date available, keep filename
+          Just _  -> drop 11 fn -- get rid of the timestamp
+
 
 selectCustomPandocCompiler :: Item String -> Compiler (Item String)
 selectCustomPandocCompiler item = do
