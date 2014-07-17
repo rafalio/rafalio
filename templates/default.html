@@ -5,13 +5,23 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Rafal's Blog - $title$</title>
-        <!--<link href='http://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>-->
+        <link href='http://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css' />
         <link href='http://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic' rel='stylesheet' type='text/css' />
-        <link rel="stylesheet" type="text/css" href="/css/reset.css" />
-        <link rel="stylesheet" type="text/css" href="/css/style.css" />
+        <link href='http://fonts.googleapis.com/css?family=Merriweather+Sans:300' rel='stylesheet' type='text/css' />
+
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" />
+
+
+        <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="/css/bootstrap-theme.min.css" />
+
         <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+        <link rel="stylesheet" type="text/css" href="/css/style.css" />
+
         <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
         </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="/js/bootstrap.min.js"></script>
 
         <script type="text/javascript">
           var _gaq = _gaq || [];
@@ -29,36 +39,72 @@
 
     <body>
 
-      <div class="container">
-        <div class="top">
-          <ul id="menu">
-            <li><a href="/">Home</a></li>
-            <li>|</li>
-            <li><a href="/about.html">About</a></li>
-            <li>|</li>
-            <li><a href="/contact.html">Contact</a></li>
-            <li>|</li>
-            <li><a href="/archives.html">Archives</a></li>
-          </ul>
+      <div class="navbar navbar-static-top">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          </div>
+          <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+              <li><a href="/">HOME</a></li>
+              <li><a href="/archives.html">ARCHIVES</a></li>
+              <li><a href="/portfolio.html">PORTFOLIO</a></li>
+              <li><a href="/about.html">ABOUT</a></li>
+              <li><a href="/contact.html">CONTACT</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
         </div>
+      </div>
+
+      <div class="container">
 
         <div id="content">
             $body$
         </div>
 
-        <div id="footer" class="footer">
-          <hr />
-          <p><a href="/static/cv_rafal_szymanski.pdf">CV</a> |
-          <a href="http://github.com/rafalio">Github</a> |
-          <a href="http://twitter.com/rafalszymanski">Twitter</a> |
-          <a href="http://www.goodreads.com/review/list/6752954-rafal?order=d&shelf=read&sort=date_read">Goodreads</a> |
-          <a href="http://uk.linkedin.com/in/szymanskirafal">LinkedIn</a> |
-          <a href="http://stackoverflow.com/users/856079/rafal-szymanski">StackOverflow</a> |
-          <a href="http://projecteuler.net/profile/radicality.png">ProjectEuler</a>
-          </p>
-        </div>
-
       </div>
+
+      <div class="footer">
+        <div class="container">
+          <div class="row">
+            <ul>
+              <li>
+              <a href="http://github.com/rafalio">
+                <span class="fa fa-github" />
+              </a>
+              </li>
+              <li>
+              <a href="http://uk.linkedin.com/in/szymanskirafal">
+                <span class="fa fa-linkedin square" />
+              </a>
+              </li>
+              <li>
+              <a href="http://www.goodreads.com/review/list/6752954-rafal?order=d&shelf=read&sort=date_read">
+                <span class="icon-stack">
+                  <i class="icon-sign-blank icon-stack-base"></i>
+                  <i class="icon-light"><span style="font-family:helvetica;">g</span></i>
+                </span>
+              </a>
+              </li>
+              <li>
+              <a href="http://stackoverflow.com/users/856079/rafal-szymanski">
+                <span class="fa fa-stack-overflow" />
+              </a>
+              </li>
+              <li>
+              <a href="http://news.ycombinator.com/user?id=radicality">
+                <span class="fa fa-hacker-news" />
+              </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
 
     </body>
 </html>

@@ -32,6 +32,9 @@ main :: IO ()
 main = hakyll $ do
 
     match "static/**" $ route idRoute >> compile copyFileCompiler
+    match "js/**" $ route idRoute >> compile copyFileCompiler
+    match "fonts/**" $ route idRoute >> compile copyFileCompiler
+
     match "css/*.css" $ route idRoute >> compile compressCssCompiler
     match "css/*.scss"  $ do 
       route $ setExtension "css"
@@ -127,19 +130,34 @@ postCtx = mconcat
 
 -- Category map from field name to where it's located in my drive
 catMap :: [(String, Pattern)]
+{-catMap = [ -}
+    {-("travel",      "posts/travel/**.markdown"),-}
+    {-("restaurants", "posts/restaurants/**.markdown"),-}
+    {-("misc",        "posts/misc/*.markdown"),-}
+    {-("philosophy",  "posts/philosophy/*.markdown"),-}
+    {-("posts",       "posts/*.markdown"),-}
+    {-("books",       "posts/books/*.markdown"),-}
+    {-("dev",         "posts/dev/*.markdown"),-}
+    {-("euler",       "posts/dev/PE/*.markdown"),-}
+    {-("leetcode",    "posts/dev/leetcode/*.markdown"),-}
+    {-("codility",    "posts/dev/codility/*.markdown"),-}
+    {-("topcoder",    "posts/dev/topcoder/*.markdown")-}
+   {-]-}
+
 catMap = [ 
-    ("travel",      "posts/travel/**.markdown"),
-    ("restaurants", "posts/restaurants/**.markdown"),
-    ("misc",        "posts/misc/*.markdown"),
-    ("philosophy",  "posts/philosophy/*.markdown"),
-    ("posts",       "posts/*.markdown"),
-    ("books",       "posts/books/*.markdown"),
-    ("dev",         "posts/dev/*.markdown"),
-    ("euler",       "posts/dev/PE/*.markdown"),
-    ("leetcode",    "posts/dev/leetcode/*.markdown"),
-    ("codility",    "posts/dev/codility/*.markdown"),
-    ("topcoder",    "posts/dev/topcoder/*.markdown")
+    ("travel",      "posts_test/travel/**.markdown"),
+    ("restaurants", "posts_test/restaurants/**.markdown"),
+    ("misc",        "posts_test/misc/*.markdown"),
+    ("philosophy",  "posts_test/philosophy/*.markdown"),
+    ("posts",       "posts_test/*.markdown"),
+    ("books",       "posts_test/books/*.markdown"),
+    ("dev",         "posts_test/dev/*.markdown"),
+    ("euler",       "posts_test/dev/PE/*.markdown"),
+    ("leetcode",    "posts_test/dev/leetcode/*.markdown"),
+    ("codility",    "posts_test/dev/codility/*.markdown"),
+    ("topcoder",    "posts_test/dev/topcoder/*.markdown")
    ]
+
 
 getPostBodies :: [Item String] -> Compiler String
 getPostBodies = return . concat . intersperse "<hr />" . map itemBody
