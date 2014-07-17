@@ -83,6 +83,7 @@ main = hakyll $ do
 
             makeItem ""
                 >>= loadAndApplyTemplate "templates/archives_template.html" archiveCtx
+                >>= loadAndApplyTemplate "templates/page.html" archiveCtx 
                 >>= loadAndApplyTemplate "templates/default.html" archiveCtx 
 
     create ["index.html"] $ do

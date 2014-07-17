@@ -1,5 +1,27 @@
-$footer-height: 100px;
+// Change page widths
 
+@media (min-width: 1200px) {
+  .container {
+    width: 800px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    width: 800px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    width: 750;
+  }
+}
+
+
+
+
+$footer-height: 100px;
 
 html {
   position: relative;
@@ -7,6 +29,9 @@ html {
 }
 body {
   margin-bottom: $footer-height;
+  font-family:"Merriweather Sans",sans-serif; 
+  font-weight:300;
+  font-size: 16px;
 }
 .footer {
   position: absolute;
@@ -35,7 +60,6 @@ body {
         }
       }
     }
-
   }
 }
 
@@ -52,7 +76,8 @@ body {
   background-color: #252525;
   font-family: 'Merriweather Sans', Arial, sans-serif;
   font-weight: 300;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
+  font-size: 14px;
 
 
   .navbar-nav > li > a:hover, .navbar-nav > li > a:focus{
@@ -68,3 +93,111 @@ body {
     padding-right: 25px;
   }
 }
+
+
+.page_header, .post_header{
+  text-align: center;
+  h1{
+    font-family: "Merriweather Sans", sans-serif;
+    text-transform:uppercase;
+    font-weight:300;
+    letter-spacing:5px;
+    margin-top:10px;
+    margin-bottom: 30px;
+  }
+}
+
+.post_header{
+  h1{
+    margin-bottom:0;
+    letter-spacing:0;
+    text-transform:none;
+  }
+  margin-bottom: 30px;
+}
+
+
+
+
+// Frontpage stuff
+
+.homepage{
+
+  ul{
+    list-style-type: none;
+    padding:0;
+  }
+
+  #recent{
+
+  }
+
+  #popular{
+    ul.popularDescription{
+      font-size: 13px;
+      padding-left: 15px;
+    }
+
+  }
+
+}
+
+
+#archives{
+  ul{
+    list-style-type: none;
+    padding-left: 0;
+    line-height: 30px;
+    font-size: 17px;
+  }
+}
+
+.darkLinks{
+  a{
+    color:#444;
+  }
+}
+
+.content{
+  line-height: 30px;
+  
+  p{
+    a{
+      color: #428bca;
+      :hover, :focus{
+        color: #428bca;
+      }
+    }
+  }
+
+  .toc{
+    ul{
+      list-style-type: none;
+      padding-left: 20px;
+    }
+    > ul{
+      padding-left: 0;
+    }
+  }
+}
+
+a{
+  color: #444;
+  :hover, :focus{
+    color: #428bca;
+  }
+}
+
+
+span.math{
+  -webkit-font-smoothing:antialiased;
+}
+
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6{
+  font-weight:300;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+
+
