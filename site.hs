@@ -53,7 +53,7 @@ main = hakyll $ do
     postTags <- buildCategories "posts/**.markdown" $ fromCapture "posts/cat/*.html"
 
     -- Static pages don't need comments and use a different layout
-    match (fromList ["contact.markdown", "about.markdown", "404.markdown"]) $ do
+    match (fromList ["contact.markdown", "about.markdown", "404.markdown", "projects.markdown"]) $ do
         route   $ setExtension "html" 
         compile $ pandocCompiler
             >>= loadAndApplyTemplate "templates/page.html"   defaultContext 
@@ -131,33 +131,33 @@ postCtx = mconcat
 
 -- Category map from field name to where it's located in my drive
 catMap :: [(String, Pattern)]
-{-catMap = [ -}
-    {-("travel",      "posts/travel/**.markdown"),-}
-    {-("restaurants", "posts/restaurants/**.markdown"),-}
-    {-("misc",        "posts/misc/*.markdown"),-}
-    {-("philosophy",  "posts/philosophy/*.markdown"),-}
-    {-("posts",       "posts/*.markdown"),-}
-    {-("books",       "posts/books/*.markdown"),-}
-    {-("dev",         "posts/dev/*.markdown"),-}
-    {-("euler",       "posts/dev/PE/*.markdown"),-}
-    {-("leetcode",    "posts/dev/leetcode/*.markdown"),-}
-    {-("codility",    "posts/dev/codility/*.markdown"),-}
-    {-("topcoder",    "posts/dev/topcoder/*.markdown")-}
-   {-]-}
-
 catMap = [ 
-    ("travel",      "posts_test/travel/**.markdown"),
-    ("restaurants", "posts_test/restaurants/**.markdown"),
-    ("misc",        "posts_test/misc/*.markdown"),
-    ("philosophy",  "posts_test/philosophy/*.markdown"),
-    ("posts",       "posts_test/*.markdown"),
-    ("books",       "posts_test/books/*.markdown"),
-    ("dev",         "posts_test/dev/*.markdown"),
-    ("euler",       "posts_test/dev/PE/*.markdown"),
-    ("leetcode",    "posts_test/dev/leetcode/*.markdown"),
-    ("codility",    "posts_test/dev/codility/*.markdown"),
-    ("topcoder",    "posts_test/dev/topcoder/*.markdown")
+    ("travel",      "posts/travel/**.markdown"),
+    ("restaurants", "posts/restaurants/**.markdown"),
+    ("misc",        "posts/misc/*.markdown"),
+    ("philosophy",  "posts/philosophy/*.markdown"),
+    ("posts",       "posts/*.markdown"),
+    ("books",       "posts/books/*.markdown"),
+    ("dev",         "posts/dev/*.markdown"),
+    ("euler",       "posts/dev/PE/*.markdown"),
+    ("leetcode",    "posts/dev/leetcode/*.markdown"),
+    ("codility",    "posts/dev/codility/*.markdown"),
+    ("topcoder",    "posts/dev/topcoder/*.markdown")
    ]
+
+{-catMap = [ -}
+    {-("travel",      "posts_test/travel/**.markdown"),-}
+    {-("restaurants", "posts_test/restaurants/**.markdown"),-}
+    {-("misc",        "posts_test/misc/*.markdown"),-}
+    {-("philosophy",  "posts_test/philosophy/*.markdown"),-}
+    {-("posts",       "posts_test/*.markdown"),-}
+    {-("books",       "posts_test/books/*.markdown"),-}
+    {-("dev",         "posts_test/dev/*.markdown"),-}
+    {-("euler",       "posts_test/dev/PE/*.markdown"),-}
+    {-("leetcode",    "posts_test/dev/leetcode/*.markdown"),-}
+    {-("codility",    "posts_test/dev/codility/*.markdown"),-}
+    {-("topcoder",    "posts_test/dev/topcoder/*.markdown")-}
+   {-]-}
 
 
 getPostBodies :: [Item String] -> Compiler String
@@ -234,6 +234,7 @@ processCodeBlock b@(CodeBlock (_, classes, pairs) code) =
         preEscapedToHtml $ (renderHtml codeHtml) ++ captStr
   in
     RawBlock "html" composed
+
 processCodeBlock x = x
 
 getLang [] = "text"

@@ -14,7 +14,7 @@ td.sourceCode { padding-left: 5px; }
 pre, code { 
   background-color: #f8f8f8; 
   font-family: Monaco, Consolas, "Lucida Console", monospace;
-  font-size: 0.95em;
+  font-size: 14px;
   overflow: auto;
   -webkit-border-radius: $radius $radius 0 0;
   -moz-border-radius: $radius $radius 0 0;
@@ -23,26 +23,30 @@ pre, code {
 }
 
 figure {
-  code {
-    padding: 0;
-  }
   figcaption {
-    background: #999;
+    background: #707070;
     padding: 5px 10px;
     color: #fff;
     -webkit-border-radius: 0 0 $radius $radius;
     -moz-border-radius: 0 0 $radius $radius;
     border-radius: 0 0 $radius $radius;
+    margin-bottom: 15px;
   }
 }
 
-code{
-  padding: 0.1em;
+pre{
+  margin-bottom: 0;
+  padding: 8px;
 }
 
-pre{
-  padding: 8px;
-  margin-top: 1em;
+// fix for horizontal scrolling
+pre {
+  overflow-x: auto;
+}
+
+pre code {
+  word-wrap: normal;
+  white-space: pre;
 }
 
 code > span.kw { color: #204a87; font-weight: bold; }
