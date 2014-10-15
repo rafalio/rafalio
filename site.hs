@@ -28,8 +28,14 @@ import           Data.Time.Clock
 
 -------------------------------------------------------------------------------
 
+config :: Configuration 
+config = defaultConfiguration
+  { deployCommand = "rsync -e '/usr/bin/ssh'  --bwlimit=2000 -av _site/* zawadzki@platypusfox.com:platypusfox.com"}
+
+-------------------------------------------------------------------------------
+
 main :: IO ()
-main = hakyll $ do
+main = hakyllWith config $ do
 
     match "static/**" $ route idRoute >> compile copyFileCompiler
     match "js/**" $ route idRoute >> compile copyFileCompiler
