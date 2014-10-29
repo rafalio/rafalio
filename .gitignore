@@ -8,3 +8,4 @@ posts
 .sass-cache
 static/
 dist/
+deployConfig.conf

@@ -24,13 +24,24 @@ import           Text.Highlighting.Kate.Format.HTML (formatHtmlBlock)
 import           System.Locale
 import           Data.Time.Format
 import           Data.Time.Clock
+import qualified Control.Exception as E
+import           System.Exit
 
 
 -------------------------------------------------------------------------------
 
-main :: IO ()
-main = hakyll $ do
+deployConfig :: IO Configuration 
+deployConfig = E.catch (readFile "deployConfig.conf" >>= 
+  (\str -> return $ defaultConfiguration { deployCommand = str})) handler
+  where
+    handler :: IOError -> IO Configuration
+    handler e = putStrLn "There was an error opening your config file. Are you sure you have deployConfig.conf?" >> exitFailure
 
+
+main :: IO ()
+main = do
+  config <- deployConfig
+  hakyllWith config $ do
     match "static/**" $ route idRoute >> compile copyFileCompiler
     match "js/**" $ route idRoute >> compile copyFileCompiler
     match "fonts/**" $ route idRoute >> compile copyFileCompiler
