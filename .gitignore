@@ -4,3 +4,7 @@ site
 _cache/
 _site/
 posts
+.DS_STORE
+.sass-cache
+static/
+dist/
