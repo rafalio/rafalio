@@ -100,7 +100,7 @@ main = do
     create ["index.html"] $ do
         route idRoute
         compile $ do
-            postBodies <- (take 10) <$> (recentFirst =<< loadAllSnapshots allPattern "content")
+            postBodies <- (take 10) <$> (recentFirst =<< loadAllSnapshots allNoMiscPattern "content")
             itemTmpl <- loadBody "templates/post-item-homepage.html"
             frontpageItems <- applyTemplateList itemTmpl postCtx postBodies
             
@@ -175,7 +175,8 @@ getPostBodies :: [Item String] -> Compiler String
 getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 
 -- a pattern to match all my content
-allPattern  =  foldl1 (.||.) (map snd catMap)
+allPattern       =  foldl1 (.||.) (map snd catMap)
+allNoMiscPattern =  allPattern .&&. (complement "posts/misc/*.markdown")
 
 postList sortFilter pattern = do
     posts   <- sortFilter =<< loadAll pattern
