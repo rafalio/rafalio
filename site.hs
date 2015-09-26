@@ -21,12 +21,13 @@ import           Text.Blaze.Html (preEscapedToHtml, (!))
 import           Text.Blaze.Html.Renderer.String (renderHtml)
 import           Text.Highlighting.Kate (highlightAs, defaultFormatOpts)
 import           Text.Highlighting.Kate.Format.HTML (formatHtmlBlock)
-import           System.Locale
+import           System.Locale hiding (defaultTimeLocale)
 import           Data.Time.Format
 import           Data.Time.Clock
 import qualified Control.Exception as E
 import           System.Exit
-
+import           Data.Digest.Pure.SHA
+import qualified Data.ByteString.Lazy.Char8 as LB
 
 -------------------------------------------------------------------------------
 
@@ -67,19 +68,21 @@ main = do
     match (fromList ["contact.markdown", "about.markdown", "404.markdown", "projects.markdown"]) $ do
         route   $ setExtension "html" 
         compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/page.html"   defaultContext 
+            >>= loadAndApplyTemplate "templates/page.html"  defaultContext 
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
 
 
     -- Everything else does need it
     match allPattern $ do
         route   $ customRoute (preparePostString . toFilePath) `composeRoutes` (setExtension "html")
-        compile $ getResourceBody
-            >>= selectCustomPandocCompiler 
-            >>= loadAndApplyTemplate "templates/post.html"   postCtx
-            >>= saveSnapshot "content"
-            >>= loadAndApplyTemplate "templates/comments.html" postCtx
-            >>= loadAndApplyTemplate "templates/default.html" postCtx
+        compile $ do
+            fileHash <- fmap (showDigest . sha1 . itemBody) getResourceLBS
+            getResourceBody 
+              >>=selectCustomPandocCompiler
+              >>= loadAndApplyTemplate "templates/post.html" (postCtx `mappend` (constField "fileHash" fileHash))
+              >>= saveSnapshot "content"
+              >>= loadAndApplyTemplate "templates/comments.html" postCtx
+              >>= loadAndApplyTemplate "templates/default.html" postCtx
 
     create ["archives.html"] $ do
         route idRoute
@@ -120,7 +123,7 @@ main = do
       route idRoute
       compile $ do
           let feedCtx = postCtx `mappend` bodyField "description"
-          posts <- fmap (take 10) . recentFirst =<< loadAllSnapshots allPattern "content"
+          posts <- fmap (take 10) . recentFirst =<< loadAllSnapshots allNoMiscPattern "content"
           renderRss feedConfig feedCtx posts
 
 --------------------------------------------------------------------------------
@@ -135,6 +138,7 @@ listTitleCtx = field "listTitle" $ \item -> do
 postCtx :: Context String
 postCtx = mconcat
     [  dateField "date" "%B %e, %Y",
+       modificationTimeField "last_updated" "%B %e, %Y",
        listTitleCtx,
        defaultContext ]
 
@@ -191,7 +195,7 @@ postListRecent pat = postList recentFirst pat
 preparePostString :: String -> String
 preparePostString path = 
     let fn = takeFileName path
-        parsedTime = parseTime defaultTimeLocale "%Y-%m-%d" (take 10 fn) :: Maybe UTCTime
+        parsedTime = parseTimeM True defaultTimeLocale "%Y-%m-%d" (take 10 fn) :: Maybe UTCTime
     in 
       ((++) "posts/") $ case parsedTime of
           Nothing -> fn         -- parse failed, no date available, keep filename
