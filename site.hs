@@ -12,6 +12,7 @@ import           Text.Pandoc.Writers.HTML
 import           Data.List.Split (splitOn)
 import           Hakyll.Core.Routes
 import           Control.Monad
+import           Control.Applicative
 import qualified Data.Map as M
 import           Data.Maybe
 import           System.FilePath    (takeBaseName, takeDirectory, takeFileName)
@@ -31,8 +32,8 @@ import qualified Data.ByteString.Lazy.Char8 as LB
 
 -------------------------------------------------------------------------------
 
-deployConfig :: IO Configuration 
-deployConfig = E.catch (readFile "deployConfig.conf" >>= 
+deployConfig :: IO Configuration
+deployConfig = E.catch (readFile "deployConfig.conf" >>=
   (\str -> return $ defaultConfiguration { deployCommand = str})) handler
   where
     handler :: IOError -> IO Configuration
@@ -48,7 +49,7 @@ main = do
     match "fonts/**" $ route idRoute >> compile copyFileCompiler
 
     match "css/*.css" $ route idRoute >> compile compressCssCompiler
-    match "css/*.scss"  $ do 
+    match "css/*.scss"  $ do
       route $ setExtension "css"
       compile $ getResourceString >>=
                 withItemBody (unixFilter "scss" ["--trace"]) >>=
@@ -56,7 +57,7 @@ main = do
 
     match "templates/*" $ compile templateCompiler
     match "*.csl" $ compile cslCompiler
-    match "*.bib" $ compile biblioCompiler 
+    match "*.bib" $ compile biblioCompiler
 
     match "posts/img/**" $ do
         route $ gsubRoute "posts/" (const "")
@@ -66,9 +67,9 @@ main = do
 
     -- Static pages don't need comments and use a different layout
     match (fromList ["contact.markdown", "about.markdown", "404.markdown", "projects.markdown"]) $ do
-        route   $ setExtension "html" 
+        route   $ setExtension "html"
         compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/page.html"  defaultContext 
+            >>= loadAndApplyTemplate "templates/page.html"  defaultContext
             >>= loadAndApplyTemplate "templates/default.html" defaultContext
 
 
@@ -77,7 +78,7 @@ main = do
         route   $ customRoute (preparePostString . toFilePath) `composeRoutes` (setExtension "html")
         compile $ do
             fileHash <- fmap (showDigest . sha1 . itemBody) getResourceLBS
-            getResourceBody 
+            getResourceBody
               >>=selectCustomPandocCompiler
               >>= loadAndApplyTemplate "templates/post.html" (postCtx `mappend` (constField "fileHash" fileHash))
               >>= saveSnapshot "content"
@@ -97,8 +98,8 @@ main = do
 
             makeItem ""
                 >>= loadAndApplyTemplate "templates/archives_template.html" archiveCtx
-                >>= loadAndApplyTemplate "templates/page.html" archiveCtx 
-                >>= loadAndApplyTemplate "templates/default.html" archiveCtx 
+                >>= loadAndApplyTemplate "templates/page.html" archiveCtx
+                >>= loadAndApplyTemplate "templates/default.html" archiveCtx
 
     create ["index.html"] $ do
         route idRoute
@@ -106,17 +107,17 @@ main = do
             postBodies <- (take 10) <$> (recentFirst =<< loadAllSnapshots allNoMiscPattern "content")
             itemTmpl <- loadBody "templates/post-item-homepage.html"
             frontpageItems <- applyTemplateList itemTmpl postCtx postBodies
-            
+
 
             let indexCtx = mconcat
                   [  constField "recentPosts" frontpageItems,
                      constField "title" "Rafal's Blog",
                      defaultContext ]
 
-            makeItem frontpageItems 
-                >>= loadAndApplyTemplate "templates/index.html" indexCtx 
+            makeItem frontpageItems
+                >>= loadAndApplyTemplate "templates/index.html" indexCtx
                 >>= loadAndApplyTemplate "templates/page.html"   indexCtx
-                >>= loadAndApplyTemplate "templates/default.html" indexCtx 
+                >>= loadAndApplyTemplate "templates/default.html" indexCtx
 
 
     create ["feed.rss"] $ do
@@ -146,12 +147,13 @@ postCtx = mconcat
 
 -- Category map from field name to where it's located in my drive
 catMap :: [(String, Pattern)]
-catMap = [ 
+catMap = [
     ("travel",      "posts/travel/**.markdown"),
     ("restaurants", "posts/restaurants/**.markdown"),
     ("misc",        "posts/misc/*.markdown"),
     ("philosophy",  "posts/philosophy/*.markdown"),
     ("posts",       "posts/*.markdown"),
+    ("reports",     "posts/reports/*.markdown"),
     ("books",       "posts/books/*.markdown"),
     ("dev",         "posts/dev/*.markdown"),
     ("euler",       "posts/dev/PE/*.markdown"),
@@ -185,18 +187,18 @@ allNoMiscPattern =  allPattern .&&. (complement "posts/misc/*.markdown")
 postList sortFilter pattern = do
     posts   <- sortFilter =<< loadAll pattern
     itemTpl <- loadBody "templates/post-item.html"
-    applyTemplateList itemTpl postCtx posts 
+    applyTemplateList itemTpl postCtx posts
 
 -- Sort by recency
-postListRecent pat = postList recentFirst pat 
+postListRecent pat = postList recentFirst pat
 
 -- This gets rid of the date string in my .md post, and adds the "posts/" prefix
 -- This is unsafe
 preparePostString :: String -> String
-preparePostString path = 
+preparePostString path =
     let fn = takeFileName path
         parsedTime = parseTimeM True defaultTimeLocale "%Y-%m-%d" (take 10 fn) :: Maybe UTCTime
-    in 
+    in
       ((++) "posts/") $ case parsedTime of
           Nothing -> fn         -- parse failed, no date available, keep filename
           Just _  -> drop 11 fn -- get rid of the timestamp
@@ -204,9 +206,16 @@ preparePostString path =
 
 selectCustomPandocCompiler :: Item String -> Compiler (Item String)
 selectCustomPandocCompiler item = do
-    metadata <- getMetadata (itemIdentifier item)
-    let wOptions = if (M.member "toc" metadata) then pandocWriterOptionsTOC else pandocWriterOptions
-    pandocCompilerWithTransform defaultHakyllReaderOptions wOptions processCodeBlocks
+    metadata <- getMetadata $ itemIdentifier item
+    let hasToc   = M.member "toc" metadata
+    let tocVal   = (M.lookup "toc" metadata >>= fmap fst . listToMaybe . reads) <|> (Just 4)
+
+    let wOptions = if hasToc then (pandocWriterOptionsTOC {writerTOCDepth = fromJust tocVal}) else pandocWriterOptions
+
+    let sections = M.member "notocsections" metadata
+    let finalOptions = wOptions {writerNumberSections = not sections}
+
+    pandocCompilerWithTransform defaultHakyllReaderOptions finalOptions processCodeBlocks
 
 feedConfig :: FeedConfiguration
 feedConfig = FeedConfiguration
@@ -219,20 +228,22 @@ feedConfig = FeedConfiguration
 
 -- Pandoc options with Math Mode (no TOC)
 pandocWriterOptions :: WriterOptions
-pandocWriterOptions = defaultHakyllWriterOptions { 
+pandocWriterOptions = defaultHakyllWriterOptions {
   writerHTMLMathMethod = MathJax ""
 }
 
 -- For pages where I want a TOC
 pandocWriterOptionsTOC :: WriterOptions
-pandocWriterOptionsTOC = defaultHakyllWriterOptions { 
+pandocWriterOptionsTOC = defaultHakyllWriterOptions {
   writerHTMLMathMethod = MathJax "",
-  writerTOCDepth = 3,
+  writerTOCDepth = defaultTOCDepth,
   writerTableOfContents = True,
   writerStandalone = True,
   writerTemplate = "<div class=\"toc\"><h3>Table of Contents</h3>\n$toc$\n</div>$body$",
   writerNumberSections = True
 }
+  where
+    defaultTOCDepth = 4
 
 
 -- Put code blocks into a figure environment
