@@ -3,7 +3,6 @@
 module Site.Util where
 
 import Site.PandocProcessors
-import Site.Contexts
 
 import Hakyll
 
@@ -16,17 +15,6 @@ import Data.List
 import Control.Applicative
 import System.FilePath (takeBaseName, takeDirectory, takeFileName)
 import Text.Pandoc.Options
-
-getPostBodies :: [Item String] -> Compiler String
-getPostBodies = return . concat . intersperse "<hr />" . map itemBody
-
-postList sortFilter pattern = do
-    posts   <- sortFilter =<< loadAll pattern
-    itemTpl <- loadBody "templates/post-item.html"
-    applyTemplateList itemTpl postCtx posts
-
--- Sort by recency
-postListRecent pat = postList recentFirst pat
 
 -- This gets rid of the date string in my .md post, and adds the "posts/" prefix
 -- This is unsafe
@@ -51,4 +39,7 @@ selectCustomPandocCompiler item = do
     let finalOptions = wOptions {writerNumberSections = not sections}
 
     pandocCompilerWithTransform defaultHakyllReaderOptions finalOptions processCodeBlocks
+
+getPostBodies :: [Item String] -> Compiler String
+getPostBodies = return . concat . intersperse "<hr />" . map itemBody
 

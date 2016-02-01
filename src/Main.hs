@@ -58,14 +58,6 @@ main = do
     create ["archives.html"] $ do
         route idRoute
         compile $ do
-            let catListCtx = mconcat $ map (\(name, pat) -> field name (const $ postListRecent pat)) catMap
-
-            let archiveCtx = mconcat [
-                    catListCtx,
-                    constField "title" "Archives",
-                    defaultContext
-                    ]
-
             makeItem ""
                 >>= loadAndApplyTemplate "templates/archives_template.html" archiveCtx
                 >>= loadAndApplyTemplate "templates/page.html" archiveCtx
@@ -103,3 +95,4 @@ deployConfig = E.catch (readFile "deployConfig.conf" >>=
     handler e = do
       putStrLn "There was an error opening your config file. Are you sure you have deployConfig.conf?"
       exitFailure
+
