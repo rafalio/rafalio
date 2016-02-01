@@ -1,32 +1,14 @@
---------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
-import           Control.Applicative ((<$>))
-import           Data.Monoid         (mappend,mconcat)
+
 import           Hakyll
-import           Data.List (intersperse, sort, sortBy)
-import           Data.Ord (comparing)
-import           Text.Pandoc
-import           Text.Pandoc.Shared
-import           Text.Pandoc.Walk
-import           Text.Pandoc.Writers.HTML
-import           Data.List.Split (splitOn)
-import           Hakyll.Core.Routes
-import           Control.Monad
-import           Control.Applicative
-import           Data.Maybe
-import           System.Locale hiding (defaultTimeLocale)
 import qualified Control.Exception as E
 import           System.Exit
 import           Data.Digest.Pure.SHA
-import qualified Data.ByteString.Lazy.Char8 as LB
 
-import Site.Patterns
-import Site.Contexts
-import Site.Util
-import Site.Constants
-
--------------------------------------------------------------------------------
-
+import           Site.Patterns
+import           Site.Contexts
+import           Site.Util
+import           Site.Constants
 
 main :: IO ()
 main = do
@@ -96,7 +78,6 @@ main = do
             itemTmpl <- loadBody "templates/post-item-homepage.html"
             frontpageItems <- applyTemplateList itemTmpl postCtx postBodies
 
-
             let indexCtx = mconcat
                   [  constField "recentPosts" frontpageItems,
                      constField "title" "Rafal's Blog",
@@ -106,7 +87,6 @@ main = do
                 >>= loadAndApplyTemplate "templates/index.html" indexCtx
                 >>= loadAndApplyTemplate "templates/page.html"   indexCtx
                 >>= loadAndApplyTemplate "templates/default.html" indexCtx
-
 
     create ["feed.rss"] $ do
       route idRoute
@@ -120,4 +100,6 @@ deployConfig = E.catch (readFile "deployConfig.conf" >>=
   (\str -> return $ defaultConfiguration { deployCommand = str})) handler
   where
     handler :: IOError -> IO Configuration
-    handler e = putStrLn "There was an error opening your config file. Are you sure you have deployConfig.conf?" >> exitFailure
+    handler e = do
+      putStrLn "There was an error opening your config file. Are you sure you have deployConfig.conf?"
+      exitFailure
