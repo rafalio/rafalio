@@ -16,13 +16,14 @@ import           Text.Highlighting.Kate.Format.HTML (formatHtmlBlock)
 
 import           Hakyll
 
--- Put code blocks into a figure environment
-processCodeBlocks :: Pandoc -> Pandoc
-processCodeBlocks = walk processCodeBlock
+-- Put code blocks into a figure environment. 
+-- Pass extenstion to figure out what language it is
+processCodeBlocks :: String -> Pandoc -> Pandoc
+processCodeBlocks ext = walk (processCodeBlock ext)
 
-processCodeBlock :: Block -> Block
-processCodeBlock b@(CodeBlock (_, classes, pairs) code) =
-  let lang     = getLang classes
+processCodeBlock :: String -> Block -> Block
+processCodeBlock ext b@(CodeBlock (_, classes, pairs) code) =
+  let lang     = getLang classes ext
       caption  = lookup "caption" pairs
       codeHtml = formatHtmlBlock defaultFormatOpts (highlightAs lang code)
       captStr  = maybe "" (renderHtml . H.figcaption . H.span . H.toHtml) caption
@@ -31,7 +32,7 @@ processCodeBlock b@(CodeBlock (_, classes, pairs) code) =
   in
     RawBlock "html" composed
 
-processCodeBlock x = x
+processCodeBlock _ x = x
 
 -- Pandoc options with Math Mode (no TOC)
 pandocWriterOptions :: WriterOptions
@@ -52,5 +53,6 @@ pandocWriterOptionsTOC = defaultHakyllWriterOptions {
   where
     defaultTOCDepth = 4
 
-getLang [] = "text"
-getLang xs = head xs
+getLang _ ".lhs" = "haskell"
+getLang [] _ = "text"
+getLang xs _ = head xs

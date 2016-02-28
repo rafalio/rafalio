@@ -15,7 +15,7 @@ catMap = [
     ("restaurants", "posts/restaurants/**.markdown"),
     ("misc",        "posts/misc/*.markdown"),
     ("philosophy",  "posts/philosophy/*.markdown"),
-    ("posts",       "posts/*.markdown"),
+    ("posts",       ("posts/*.markdown" .||. "posts/*.lhs")),
     ("reports",     "posts/reports/*.markdown"),
     ("books",       "posts/books/*.markdown"),
     ("dev",         "posts/dev/*.markdown"),

@@ -17,7 +17,7 @@ postsRoute =  match allPattern $ do
   compile $ do
     fileHash <- fmap (showDigest . sha1 . itemBody) getResourceLBS
     getResourceBody
-      >>=selectCustomPandocCompiler
+      >>= selectCustomPandocCompiler
       >>= loadAndApplyTemplate "templates/post.html" (postCtx `mappend` (constField "fileHash" fileHash))
       >>= saveSnapshot "content"
       >>= loadAndApplyTemplate "templates/comments.html" postCtx

@@ -7,10 +7,13 @@ import Site.PandocProcessors
 import Hakyll
 
 import qualified Data.Map as M
+import qualified Data.Set as S
 import Data.Maybe
 import Data.Time.Format
 import Data.Time.Clock
 import Data.List
+
+import System.FilePath.Posix
 
 import Control.Applicative
 import System.FilePath (takeBaseName, takeDirectory, takeFileName)
@@ -36,9 +39,15 @@ selectCustomPandocCompiler item = do
     let wOptions = if hasToc then (pandocWriterOptionsTOC {writerTOCDepth = fromJust tocVal}) else pandocWriterOptions
 
     let sections = M.member "notocsections" metadata
+    let curWExts = writerExtensions defaultHakyllWriterOptions
     let finalOptions = wOptions {writerNumberSections = not sections}
 
-    pandocCompilerWithTransform defaultHakyllReaderOptions finalOptions processCodeBlocks
+    let ident = takeExtension . toFilePath . itemIdentifier $ item
+    let curExts = readerExtensions defaultHakyllReaderOptions
+
+    let rOptions = if (ident == ".lhs") then defaultHakyllReaderOptions {readerExtensions = S.insert Ext_literate_haskell curExts} else defaultHakyllReaderOptions
+
+    pandocCompilerWithTransform rOptions finalOptions (processCodeBlocks ident)
 
 getPostBodies :: [Item String] -> Compiler String
 getPostBodies = return . concat . intersperse "<hr />" . map itemBody
