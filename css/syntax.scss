@@ -1,20 +1,18 @@
 $radius: 5px;
 
-code{
-  white-space: pre;
-}
-
-
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
 margin: 0; padding: 0; vertical-align: baseline; border: none; }
 table.sourceCode { width: 100%; line-height: 100%; background-color: #f8f8f8; }
 td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
 td.sourceCode { padding-left: 5px; }
 
+code{
+  white-space: pre;
+}
+
 pre, code { 
   background-color: #f8f8f8; 
   font-family: Monaco, Consolas, "Lucida Console", monospace;
-  font-size: 14px;
   overflow: auto;
   -webkit-border-radius: $radius $radius 0 0;
   -moz-border-radius: $radius $radius 0 0;
@@ -30,18 +28,19 @@ figure {
     -webkit-border-radius: 0 0 $radius $radius;
     -moz-border-radius: 0 0 $radius $radius;
     border-radius: 0 0 $radius $radius;
-    margin-bottom: 15px;
   }
 }
 
-pre{
-  margin-bottom: 0;
-  padding: 8px;
+figure.code
+{
+  margin-bottom: 10px;
 }
 
 // fix for horizontal scrolling
 pre {
   overflow-x: auto;
+  margin-bottom: 0;
+  padding: 8px;
 }
 
 pre code {
@@ -49,6 +48,7 @@ pre code {
   white-space: pre;
 }
 
+// Colors
 code > span.kw { color: #204a87; font-weight: bold; }
 code > span.dt { color: #204a87; }
 code > span.dv { color: #0000cf; }
