@@ -4,6 +4,7 @@ module Site.Contexts where
 
 import Hakyll
 import Data.Maybe
+import Data.List.Split
 import qualified Data.Map as M
 import Control.Monad
 
@@ -33,8 +34,11 @@ postCtx :: Context String
 postCtx = mconcat
     [  dateField "date" "%B %e, %Y",
        modificationTimeField "last_updated" "%B %e, %Y",
+       field "disqus_id" (return . disqus_id),
        listTitleCtx,
        defaultContext ]
+  where
+    disqus_id i = last $ splitOn "/" (show $ itemIdentifier i)
 
 postList sortFilter pattern = do
     posts   <- sortFilter =<< loadAll pattern
