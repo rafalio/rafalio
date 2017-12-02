@@ -3,6 +3,7 @@
 _cache/
 _site/
 posts
+posts_test
 .DS_STORE
 .sass-cache
 static/

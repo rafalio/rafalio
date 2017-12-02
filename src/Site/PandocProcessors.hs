@@ -46,8 +46,7 @@ pandocWriterOptionsTOC = defaultHakyllWriterOptions {
   writerHTMLMathMethod = MathJax "",
   writerTOCDepth = defaultTOCDepth,
   writerTableOfContents = True,
-  writerStandalone = True,
-  writerTemplate = "<div class=\"toc\"><h3>Table of Contents</h3>\n$toc$\n</div>$body$",
+  writerTemplate = Just "<div class=\"toc\"><h3>Table of Contents</h3>\n$toc$\n</div>$body$",
   writerNumberSections = True
 }
   where

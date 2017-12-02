@@ -33,12 +33,12 @@ preparePostString path =
 selectCustomPandocCompiler :: Item String -> Compiler (Item String)
 selectCustomPandocCompiler item = do
     metadata <- getMetadata $ itemIdentifier item
-    let hasToc   = M.member "toc" metadata
-    let tocVal   = (M.lookup "toc" metadata >>= fmap fst . listToMaybe . reads) <|> (Just 4)
+    let hasToc   = isJust $ lookupString "toc" metadata
+    let tocVal   = (lookupString "toc" metadata >>= fmap fst . listToMaybe . reads) <|> (Just 4)
 
     let wOptions = if hasToc then (pandocWriterOptionsTOC {writerTOCDepth = fromJust tocVal}) else pandocWriterOptions
 
-    let sections = M.member "notocsections" metadata
+    let sections = isJust $ lookupString "notocsections" metadata
     let curWExts = writerExtensions defaultHakyllWriterOptions
     let finalOptions = wOptions {writerNumberSections = not sections}
 

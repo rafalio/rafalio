@@ -28,7 +28,7 @@ archiveCtx = mconcat [
 listTitleCtx :: Context a
 listTitleCtx = field "listTitle" $ \item -> do
                  metadata <- getMetadata (itemIdentifier item)
-                 return . fromJust . msum $ (flip M.lookup) metadata <$> ["short","title"]
+                 return . fromJust . msum $ (flip lookupString) metadata <$> ["short","title"]
 
 postCtx :: Context String
 postCtx = mconcat
